@@ -8,7 +8,7 @@ let options = {
   token:
     "007eJxTYPglvjXh8FOvRBFbrQ8vg6PWpKQteLz9O1O2vLxW8kl1tmAFBosUM1PTZEPTFLOkNBMjYxPL5NRUQ8OUJBOLZMNk0ySjQ16CqQ2BjAw6fCdYGRkgEMRnZShJLS4xYmAAACATHfk=",
 
-  uid: 0,
+  uid: Math.floor(Math.random() * 10000),
 
   role: "",
 };
@@ -46,13 +46,10 @@ async function startBasicCall() {
 
   agoraEngine.on("user-published", async (user, mediaType) => {
     await agoraEngine.subscribe(user, mediaType);
-
     if (mediaType == "video") {
       channelParameters.remoteVideoTrack = user.videoTrack;
 
       channelParameters.remoteAudioTrack = user.audioTrack;
-
-      channelParameters.remoteUid = user.uid.toString();
 
       remotePlayerContainer.id = user.uid.toString();
       channelParameters.remoteUid = user.uid.toString();
@@ -75,97 +72,102 @@ async function startBasicCall() {
     });
   });
 
-  window.onload = function () {
-    document.getElementById("join").onclick = async function () {
-      if (options.role == "") {
-        window.alert("Select a user role first!");
+  const containerEl = document.querySelector(".container");
+  await agoraEngine.join(
+    options.appId,
+    options.channel,
+    options.token,
+    options.uid
+  );
+
+  containerEl.addEventListener("click", async (e) => {
+    // Teacher's logic, Markup and event listeners
+    if (e.target.closest(".teacher-btn")) {
+      containerEl.innerHTML = `
+                                <button type="button" id="audio">Stream audio</button>
+                                <button type="button" id="video">Stream Video</button>
+                                <button type="button" id="leave">Leave</button>`;
+
+      options.role = "host";
+      await agoraEngine.setClientRole(options.role);
+    }
+
+    if (e.target.closest("#video")) {
+      if (
+        channelParameters.localAudioTrack &&
+        channelParameters.localVideoTrack
+      )
         return;
+      if (channelParameters.remoteVideoTrack) {
+        channelParameters.remoteVideoTrack.stop();
       }
-
-      await agoraEngine.join(
-        options.appId,
-        options.channel,
-        options.token,
-        options.uid
-      );
-
-      channelParameters.localAudioTrack =
-        await AgoraRTC.createMicrophoneAudioTrack();
-
-      channelParameters.localVideoTrack =
-        await AgoraRTC.createCameraVideoTrack();
-
-      document.body.append(localPlayerContainer);
-
-      if (options.role === "host") {
+      if (!channelParameters.localAudioTrack) {
+        channelParameters.localAudioTrack =
+          await AgoraRTC.createMicrophoneAudioTrack();
         await agoraEngine.publish(channelParameters.localAudioTrack);
         channelParameters.localAudioTrack.play();
-
-        document.getElementById("video").onclick = async function () {
-          await agoraEngine.publish(channelParameters.localVideoTrack);
-
-          channelParameters.localVideoTrack.play(localPlayerContainer);
-        };
-        document.getElementById("audio").onclick = async function () {
-          await agoraEngine.unpublish(channelParameters.localVideoTrack);
-
-          channelParameters.localVideoTrack.stop();
-        };
       }
-    };
+      channelParameters.localVideoTrack =
+        await AgoraRTC.createCameraVideoTrack();
+      containerEl.append(localPlayerContainer);
+      await agoraEngine.publish(channelParameters.localVideoTrack);
+      channelParameters.localVideoTrack.play(localPlayerContainer);
+    }
 
-    document.getElementById("leave").onclick = async function () {
+    if (e.target.closest("#audio")) {
+      if (channelParameters.localVideoTrack) {
+        // TODO Improve this line to remove the video container from the dom
+        localPlayerContainer.querySelector("div").remove();
+        channelParameters.localVideoTrack = null;
+        await agoraEngine.unpublish(channelParameters.localVideoTrack);
+      }
+
+      if (channelParameters.localAudioTrack) return;
+      channelParameters.localAudioTrack =
+        await AgoraRTC.createMicrophoneAudioTrack();
+      await agoraEngine.publish(channelParameters.localAudioTrack);
+      channelParameters.localAudioTrack.play();
+    }
+
+    // Student's logic, Markup and event listeners
+    if (e.target.closest(".student-btn")) {
+      containerEl.innerHTML = `<button type="button" id="join">Join Stream</button>
+        <button type="button" id="leave">Leave</button>`;
+
+      options.role = "audience";
+      await agoraEngine.setClientRole(options.role);
+    }
+    if (e.target.closest("#join")) {
+      const clientRoleOptions = { level: 1 }; // Use Low latency mode
+
+      if (
+        channelParameters.localAudioTrack &&
+        channelParameters.localVideoTrack
+      ) {
+        await agoraEngine.unpublish([
+          channelParameters.localAudioTrack,
+          channelParameters.localVideoTrack,
+        ]);
+        channelParameters.localVideoTrack.stop();
+        if (channelParameters.remoteVideoTrack) {
+          channelParameters.remoteVideoTrack.play(remotePlayerContainer);
+        }
+      }
+
+      await agoraEngine.setClientRole(options.role, clientRoleOptions);
+    }
+    if (e.target.closest("#leave")) {
       channelParameters.localAudioTrack.close();
       channelParameters.localVideoTrack.close();
 
-      removeVideoDiv(remotePlayerContainer.id);
-      removeVideoDiv(localPlayerContainer.id);
+      remotePlayerContainer.remove();
+      localPlayerContainer.remove();
 
       await agoraEngine.leave();
 
       window.location.reload();
-    };
-
-    document.getElementById("host").onclick = async function () {
-      if (document.getElementById("host").checked) {
-        options.role = "host";
-
-        await agoraEngine.setClientRole(options.role);
-        if (channelParameters.localVideoTrack != null) {
-          await agoraEngine.publish([
-            channelParameters.localAudioTrack,
-            channelParameters.localVideoTrack,
-          ]);
-
-          channelParameters.remoteVideoTrack.stop();
-
-          channelParameters.localVideoTrack.play(localPlayerContainer);
-        }
-      }
-    };
-    document.getElementById("Audience").onclick = async function () {
-      if (document.getElementById("Audience").checked) {
-        options.role = "audience";
-        const clientRoleOptions = { level: 1 }; // Use Low latency
-        if (
-          channelParameters.localAudioTrack != null &&
-          channelParameters.localVideoTrack != null
-        ) {
-          await agoraEngine.unpublish([
-            channelParameters.localVideoTrack,
-            channelParameters.localAudioTrack,
-          ]);
-        }
-        await agoraEngine.setClientRole(options.role, clientRoleOptions);
-      }
-    };
-  };
+    }
+  });
 }
+
 startBasicCall();
-// Remove the video stream from the container.
-function removeVideoDiv(elementId) {
-  let El = document.getElementById(elementId);
-  if (El) {
-    El.remove();
-  }
-}
