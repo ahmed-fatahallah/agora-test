@@ -26,6 +26,7 @@ let channelParameters = {
 };
 
 async function startBasicCall() {
+  const containerEl = document.querySelector(".container");
   const agoraEngine = AgoraRTC.createClient({ mode: "live", codec: "vp9" });
 
   const remotePlayerContainer = document.createElement("div");
@@ -46,33 +47,40 @@ async function startBasicCall() {
 
   agoraEngine.on("user-published", async (user, mediaType) => {
     await agoraEngine.subscribe(user, mediaType);
-    if (mediaType == "video") {
-      channelParameters.remoteVideoTrack = user.videoTrack;
+    channelParameters.remoteVideoTrack = user.videoTrack;
 
-      channelParameters.remoteAudioTrack = user.audioTrack;
+    channelParameters.remoteAudioTrack = user.audioTrack;
 
-      remotePlayerContainer.id = user.uid.toString();
-      channelParameters.remoteUid = user.uid.toString();
-      remotePlayerContainer.textContent = "Remote user " + user.uid.toString();
-
-      document.body.append(remotePlayerContainer);
-      if (options.role != "host") {
-        channelParameters.remoteVideoTrack.play(remotePlayerContainer);
+    containerEl.addEventListener("click", async (e) => {
+      if (e.target.closest("#student-btn")) {
       }
-    }
 
-    if (mediaType == "audio") {
-      channelParameters.remoteAudioTrack = user.audioTrack;
+      if (e.target.closest("#join")) {
+        if (mediaType == "video") {
+          remotePlayerContainer.id = user.uid.toString();
+          channelParameters.remoteUid = user.uid.toString();
+          remotePlayerContainer.textContent =
+            "Remote user " + user.uid.toString();
 
-      channelParameters.remoteAudioTrack.play();
-    }
+          document.body.append(remotePlayerContainer);
+          if (options.role != "host") {
+            channelParameters.remoteVideoTrack.play(remotePlayerContainer);
+          }
+        }
 
-    agoraEngine.on("user-unpublished", (user) => {
-      console.log(user.uid + "has left the channel");
+        if (mediaType == "audio") {
+          channelParameters.remoteAudioTrack = user.audioTrack;
+
+          channelParameters.remoteAudioTrack.play();
+        }
+      }
+      agoraEngine.on("user-unpublished", (user) => {
+        channelParameters.remoteVideoTrack = null;
+        remotePlayerContainer.querySelector("div").remove();
+      });
     });
   });
 
-  const containerEl = document.querySelector(".container");
   await agoraEngine.join(
     options.appId,
     options.channel,
