@@ -3,10 +3,10 @@ import AgoraRTC from "agora-rtc-sdk-ng";
 let options = {
   appId: "8d655c15d6bf42349cee11db48c1c5b2",
 
-  channel: "test",
+  channel: "test2",
 
   token:
-    "007eJxTYNAJ5pH+pqrMKi5+zmGtUrD+Kc1bVxcfZs2/oM3joGlbZK3AYJFiZmqabGiaYpaUZmJkbGKZnJpqaJiSZGKRbJhsmmQk/54/tSGQkaFbcBYDIxSC+CwMJanFJQwMANCWGp8=",
+    "007eJxTYPglvjXh8FOvRBFbrQ8vg6PWpKQteLz9O1O2vLxW8kl1tmAFBosUM1PTZEPTFLOkNBMjYxPL5NRUQ8OUJBOLZMNk0ySjQ16CqQ2BjAw6fCdYGRkgEMRnZShJLS4xYmAAACATHfk=",
 
   uid: 0,
 
