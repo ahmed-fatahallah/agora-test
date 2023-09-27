@@ -49,7 +49,6 @@ async function startBasicCall() {
     await agoraEngine.subscribe(user, mediaType);
     channelParameters.remoteVideoTrack = user.videoTrack;
     channelParameters.remoteAudioTrack = user.audioTrack;
-
     if (mediaType == "video") {
       remotePlayerContainer.id = user.uid.toString();
       channelParameters.remoteUid = user.uid.toString();
@@ -61,7 +60,9 @@ async function startBasicCall() {
     }
 
     if (mediaType == "audio") {
-      channelParameters.remoteAudioTrack.play();
+      if (options.role === "audience") {
+        channelParameters.remoteAudioTrack.play();
+      }
     }
 
     agoraEngine.on("user-unpublished", () => {
@@ -96,20 +97,23 @@ async function startBasicCall() {
     if (e.target.closest("#video")) {
       e.target.disabled = true;
       containerEl.querySelector("#audio").disabled = false;
+
       if (
         channelParameters.localAudioTrack &&
         channelParameters.localVideoTrack
       )
         return;
+
       if (channelParameters.remoteVideoTrack) {
         channelParameters.remoteVideoTrack.stop();
       }
+
       if (!channelParameters.localAudioTrack) {
         channelParameters.localAudioTrack =
-          await AgoraRTC.createMicrophoneAudioTrack();
+          await AgoraRTC.createMicrophoneAudioTrack({ AGC: false });
         await agoraEngine.publish(channelParameters.localAudioTrack);
-        channelParameters.localAudioTrack.play();
       }
+
       channelParameters.localVideoTrack =
         await AgoraRTC.createCameraVideoTrack();
       containerEl.append(localPlayerContainer);
@@ -123,29 +127,28 @@ async function startBasicCall() {
       if (channelParameters.localVideoTrack) {
         // TODO Improve this line to remove the video container from the dom
         localPlayerContainer.querySelector("div").remove();
-        channelParameters.localVideoTrack = null;
+
         await agoraEngine.unpublish(channelParameters.localVideoTrack);
+        channelParameters.localVideoTrack = null;
       }
 
       if (channelParameters.localAudioTrack) return;
       channelParameters.localAudioTrack =
         await AgoraRTC.createMicrophoneAudioTrack();
       await agoraEngine.publish(channelParameters.localAudioTrack);
-      channelParameters.localAudioTrack.play();
     }
 
     // Student's logic, Markup and event listeners
     if (e.target.closest(".student-btn")) {
       containerEl.innerHTML = `<button type="button" id="join">Join Stream</button>
         <button type="button" id="leave">Leave</button>`;
-
-      options.role = "audience";
-      await agoraEngine.setClientRole(options.role);
     }
     if (e.target.closest("#join")) {
       e.target.disabled = true;
+      options.role = "audience";
       const clientRoleOptions = { level: 1 }; // Use Low latency mode
       await agoraEngine.setClientRole(options.role, clientRoleOptions);
+      channelParameters.remoteAudioTrack.play();
 
       if (
         channelParameters.remoteAudioTrack &&
@@ -153,8 +156,6 @@ async function startBasicCall() {
       ) {
         document.body.append(remotePlayerContainer);
         channelParameters.remoteVideoTrack.play(remotePlayerContainer);
-      } else {
-        channelParameters.remoteAudioTrack.play();
       }
     }
     if (e.target.closest("#leave")) {
