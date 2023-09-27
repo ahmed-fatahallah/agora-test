@@ -34,8 +34,7 @@ async function startBasicCall() {
   const localPlayerContainer = document.createElement("div");
 
   localPlayerContainer.id = options.uid;
-
-  localPlayerContainer.textContent = "Local user " + options.uid;
+  localPlayerContainer.className = "video-container";
 
   localPlayerContainer.style.width = "640px";
   localPlayerContainer.style.height = "480px";
@@ -44,6 +43,7 @@ async function startBasicCall() {
   remotePlayerContainer.style.width = "640px";
   remotePlayerContainer.style.height = "480px";
   remotePlayerContainer.style.padding = "15px 5px 5px 5px";
+  remotePlayerContainer.className = "remote-container";
 
   agoraEngine.on("user-published", async (user, mediaType) => {
     await agoraEngine.subscribe(user, mediaType);
@@ -52,7 +52,7 @@ async function startBasicCall() {
     if (mediaType == "video") {
       remotePlayerContainer.id = user.uid.toString();
       channelParameters.remoteUid = user.uid.toString();
-      remotePlayerContainer.textContent = "Remote user " + user.uid.toString();
+
       if (options.role === "audience") {
         document.body.append(remotePlayerContainer);
         channelParameters.remoteVideoTrack.play(remotePlayerContainer);
@@ -97,7 +97,14 @@ async function startBasicCall() {
     if (e.target.closest("#video")) {
       e.target.disabled = true;
       containerEl.querySelector("#audio").disabled = false;
-
+      if (!document.querySelector(".row").querySelector("h3")) {
+        document
+          .querySelector(".row")
+          .insertAdjacentHTML(
+            "beforeend",
+            `<h3>Teacher Id: ${options.uid}</h3>`
+          );
+      }
       if (
         channelParameters.localAudioTrack &&
         channelParameters.localVideoTrack
@@ -116,7 +123,7 @@ async function startBasicCall() {
 
       channelParameters.localVideoTrack =
         await AgoraRTC.createCameraVideoTrack();
-      containerEl.append(localPlayerContainer);
+      document.body.append(localPlayerContainer);
       await agoraEngine.publish(channelParameters.localVideoTrack);
       channelParameters.localVideoTrack.play(localPlayerContainer);
     }
@@ -124,6 +131,14 @@ async function startBasicCall() {
     if (e.target.closest("#audio")) {
       e.target.disabled = true;
       containerEl.querySelector("#video").disabled = false;
+      if (!document.querySelector(".row").querySelector("h3")) {
+        document
+          .querySelector(".row")
+          .insertAdjacentHTML(
+            "beforeend",
+            `<h3>Teacher Id: ${options.uid}</h3>`
+          );
+      }
       if (channelParameters.localVideoTrack) {
         // TODO Improve this line to remove the video container from the dom
         localPlayerContainer.querySelector("div").remove();
@@ -149,6 +164,9 @@ async function startBasicCall() {
       const clientRoleOptions = { level: 1 }; // Use Low latency mode
       await agoraEngine.setClientRole(options.role, clientRoleOptions);
       channelParameters.remoteAudioTrack.play();
+      document
+        .querySelector(".row")
+        .insertAdjacentHTML("beforeend", `<h3>Student Id: ${options.uid}</h3>`);
 
       if (
         channelParameters.remoteAudioTrack &&
