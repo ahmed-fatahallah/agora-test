@@ -6,4 +6,5 @@ export default defineConfig({
     host: true,
     port: 5000,
   },
+  base: "/agora-test",
 });
