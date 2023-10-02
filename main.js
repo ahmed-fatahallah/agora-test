@@ -103,11 +103,6 @@ async function startBasicCall() {
             `<h3>Teacher Id: ${options.uid}</h3>`
           );
       }
-      if (
-        channelParameters.localAudioTrack &&
-        channelParameters.localVideoTrack
-      )
-        return;
 
       if (channelParameters.remoteVideoTrack) {
         channelParameters.remoteVideoTrack.stop();
@@ -142,7 +137,7 @@ async function startBasicCall() {
         localPlayerContainer.querySelector("div").remove();
 
         await agoraEngine.unpublish(channelParameters.localVideoTrack);
-        channelParameters.localVideoTrack = null;
+        channelParameters.localVideoTrack.close();
       }
 
       if (channelParameters.localAudioTrack) return;
