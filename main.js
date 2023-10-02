@@ -1,12 +1,12 @@
 import * as AgoraRTC from "agora-rtc-sdk-ng";
 
 let options = {
-  appId: "31ad69a8d07a48dd9c5363d0010a2fea",
+  appId: "8d655c15d6bf42349cee11db48c1c5b2",
 
-  channel: "958190847689",
+  channel: "test",
 
   token:
-    "00631ad69a8d07a48dd9c5363d0010a2feaIAC98s9Ariu3YkNVPkxOeI9aJebOYZbESbEEtt8COeyOAbIg72IAAAAACgBQv",
+    "007eJxTYDgXf/XVqkm7zs/Jn/k7WPpsVvv8zsvHJj7VefAv5dU3/m8GCgwWKWampsmGpilmSWkmRsYmlsmpqYaGKUkmFsmGyaZJRmIbpVIbAhkZ3r6fyMzIAIEgPgtDSWpxCQMDANTMJIc=",
 
   uid: Math.floor(Math.random() * 10000),
 
@@ -27,7 +27,10 @@ let channelParameters = {
 
 async function startBasicCall() {
   const containerEl = document.querySelector(".container");
-  const agoraEngine = AgoraRTC.createClient({ mode: "live", codec: "vp9" });
+  const agoraEngine = AgoraRTC.createClient({
+    mode: "live",
+    codec: "h264",
+  });
 
   const remotePlayerContainer = document.createElement("div");
 
@@ -75,12 +78,7 @@ async function startBasicCall() {
     });
   });
 
-  await agoraEngine.join(
-    options.appId,
-    options.channel,
-    options.token,
-    options.uid
-  );
+  await agoraEngine.join(options.appId, options.channel, options.token);
 
   containerEl.addEventListener("click", async (e) => {
     // Teacher's logic, Markup and event listeners
