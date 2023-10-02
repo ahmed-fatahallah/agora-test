@@ -6,7 +6,7 @@ let options = {
   channel: "test",
 
   token:
-    "007eJxTYPCY3/GVs9BrdcqpX0qZ8ko2X9i6Dm/ZoWE1Kdt157eaXUYKDBYpZqamyYamKWZJaSZGxiaWyamphoYpSSYWyYbJpklGiyREUhsCGRlW/r3PwsgAgSA+C0NJanEJAwMAQTwfyA==",
+    "00631ad69a8d07a48dd9c5363d0010a2feaIAC98s9Ariu3YkNVPkxOeI9aJebOYZbESbEEtt8COeyOAbIg72IAAAAACgBQv",
 
   uid: Math.floor(Math.random() * 10000),
 
