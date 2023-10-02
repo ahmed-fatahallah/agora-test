@@ -1,9 +1,9 @@
 import * as AgoraRTC from "agora-rtc-sdk-ng";
 
 let options = {
-  appId: "8d655c15d6bf42349cee11db48c1c5b2",
+  appId: "31ad69a8d07a48dd9c5363d0010a2fea",
 
-  channel: "test",
+  channel: "958190847689",
 
   token:
     "00631ad69a8d07a48dd9c5363d0010a2feaIAC98s9Ariu3YkNVPkxOeI9aJebOYZbESbEEtt8COeyOAbIg72IAAAAACgBQv",
