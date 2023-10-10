@@ -93,15 +93,8 @@ async function startBasicCall() {
       // }
     }
 
-    agoraEngine.on("user-unpublished", () => {});
+    agoraEngineVoice.on("user-unpublished", () => {});
   });
-
-  await agoraEngine.join(options.appId, options.channel, options.token);
-  await agoraEngineVoice.join(
-    "8d655c15d6bf42349cee11db48c1c5b2",
-    "494164583032",
-    "00631ad69a8d07a48dd9c5363d0010a2feaIADmjc9cGbOPseriZvAR4+urHYdYNuozVxXyOU0zfQvJAtNwrkcAAAAACgC2b/RTnEsmZQAA}"
-  );
 
   containerEl.addEventListener("click", async (e) => {
     // Teacher's logic, Markup and event listeners
@@ -115,6 +108,7 @@ async function startBasicCall() {
                                 <button type="button" id="leave">Leave</button>`;
 
       options.role = "host";
+
       await agoraEngine.setClientRole(options.role);
       await agoraEngineVoice.setClientRole(options.role);
     }
@@ -130,6 +124,13 @@ async function startBasicCall() {
             `<h3>Teacher Id: ${options.uid}</h3>`
           );
       }
+
+      await agoraEngine.join(options.appId, options.channel, options.token);
+      await agoraEngineVoice.join(
+        "8d655c15d6bf42349cee11db48c1c5b2",
+        "494164583032",
+        "00631ad69a8d07a48dd9c5363d0010a2feaIADmjc9cGbOPseriZvAR4+urHYdYNuozVxXyOU0zfQvJAtNwrkcAAAAACgC2b/RTnEsmZQAA}"
+      );
 
       if (channelParameters.remoteVideoTrack) {
         channelParameters.remoteVideoTrack.stop();
