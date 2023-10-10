@@ -82,11 +82,12 @@ async function startBasicCall() {
     });
   });
   agoraEngineVoice.on("user-published", async (user, mediaType) => {
-    await agoraEngine.subscribe(user, mediaType);
+    await agoraEngineVoice.subscribe(user, mediaType);
 
     channelParameters.remoteAudioTrack = user.audioTrack;
 
     if (mediaType == "audio") {
+      channelParameters.remoteAudioTrack.play();
       if (options.role === "audience") {
         channelParameters.remoteAudioTrack.play();
       }
