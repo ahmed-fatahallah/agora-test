@@ -52,35 +52,35 @@ async function startBasicCall() {
   remotePlayerContainer.style.padding = "15px 5px 5px 5px";
   remotePlayerContainer.className = "remote-container";
 
-  agoraEngine.on("user-published", async (user, mediaType) => {
-    await agoraEngine.subscribe(user, mediaType);
-    channelParameters.remoteVideoTrack = user.videoTrack;
-    channelParameters.remoteAudioTrack = user.audioTrack;
-    if (mediaType == "video") {
-      remotePlayerContainer.id = user.uid.toString();
-      channelParameters.remoteUid = user.uid.toString();
+  // agoraEngine.on("user-published", async (user, mediaType) => {
+  //   await agoraEngine.subscribe(user, mediaType);
+  //   channelParameters.remoteVideoTrack = user.videoTrack;
+  //   channelParameters.remoteAudioTrack = user.audioTrack;
+  //   if (mediaType == "video") {
+  //     remotePlayerContainer.id = user.uid.toString();
+  //     channelParameters.remoteUid = user.uid.toString();
 
-      if (options.role === "audience") {
-        document.body.append(remotePlayerContainer);
-        channelParameters.remoteVideoTrack.play(remotePlayerContainer);
-      }
-    }
+  //     if (options.role === "audience") {
+  //       document.body.append(remotePlayerContainer);
+  //       channelParameters.remoteVideoTrack.play(remotePlayerContainer);
+  //     }
+  //   }
 
-    if (mediaType == "audio") {
-      if (options.role === "audience") {
-        channelParameters.remoteAudioTrack.play();
-      }
-    }
+  //   if (mediaType == "audio") {
+  //     if (options.role === "audience") {
+  //       channelParameters.remoteAudioTrack.play();
+  //     }
+  //   }
 
-    agoraEngine.on("user-unpublished", () => {
-      channelParameters.remoteVideoTrack = null;
-      if (
-        options.role === "audience" &&
-        remotePlayerContainer.querySelector("div")
-      )
-        remotePlayerContainer.querySelector("div").remove();
-    });
-  });
+  //   agoraEngine.on("user-unpublished", () => {
+  //     channelParameters.remoteVideoTrack = null;
+  //     if (
+  //       options.role === "audience" &&
+  //       remotePlayerContainer.querySelector("div")
+  //     )
+  //       remotePlayerContainer.querySelector("div").remove();
+  //   });
+  // });
   agoraEngineVoice.on("user-published", async (user, mediaType) => {
     await agoraEngineVoice.subscribe(user, mediaType);
 
@@ -88,9 +88,9 @@ async function startBasicCall() {
 
     if (mediaType == "audio") {
       channelParameters.remoteAudioTrack.play();
-      if (options.role === "audience") {
-        channelParameters.remoteAudioTrack.play();
-      }
+      // if (options.role === "audience") {
+      //   channelParameters.remoteAudioTrack.play();
+      // }
     }
 
     agoraEngine.on("user-unpublished", () => {});
@@ -106,8 +106,11 @@ async function startBasicCall() {
   containerEl.addEventListener("click", async (e) => {
     // Teacher's logic, Markup and event listeners
     if (e.target.closest(".teacher-btn")) {
+      // containerEl.innerHTML = `
+      //                           <button type="button" id="audio">Stream audio</button>
+      //                           <button type="button" id="video">Stream Video</button>
+      //                           <button type="button" id="leave">Leave</button>`;
       containerEl.innerHTML = `
-                                <button type="button" id="audio">Stream audio</button>
                                 <button type="button" id="video">Stream Video</button>
                                 <button type="button" id="leave">Leave</button>`;
 
@@ -118,7 +121,7 @@ async function startBasicCall() {
 
     if (e.target.closest("#video")) {
       e.target.disabled = true;
-      containerEl.querySelector("#audio").disabled = false;
+      // containerEl.querySelector("#audio").disabled = false;
       if (!document.querySelector(".row").querySelector("h3")) {
         document
           .querySelector(".row")
@@ -145,54 +148,54 @@ async function startBasicCall() {
       channelParameters.localVideoTrack.play(localPlayerContainer);
     }
 
-    if (e.target.closest("#audio")) {
-      e.target.disabled = true;
-      containerEl.querySelector("#video").disabled = false;
-      if (!document.querySelector(".row").querySelector("h3")) {
-        document
-          .querySelector(".row")
-          .insertAdjacentHTML(
-            "beforeend",
-            `<h3>Teacher Id: ${options.uid}</h3>`
-          );
-      }
-      if (channelParameters.localVideoTrack) {
-        // TODO Improve this line to remove the video container from the dom
-        localPlayerContainer.querySelector("div").remove();
+    // if (e.target.closest("#audio")) {
+    //   e.target.disabled = true;
+    //   containerEl.querySelector("#video").disabled = false;
+    //   if (!document.querySelector(".row").querySelector("h3")) {
+    //     document
+    //       .querySelector(".row")
+    //       .insertAdjacentHTML(
+    //         "beforeend",
+    //         `<h3>Teacher Id: ${options.uid}</h3>`
+    //       );
+    //   }
+    //   if (channelParameters.localVideoTrack) {
+    //     // TODO Improve this line to remove the video container from the dom
+    //     localPlayerContainer.querySelector("div").remove();
 
-        await agoraEngine.unpublish(channelParameters.localVideoTrack);
-        channelParameters.localVideoTrack.close();
-      }
+    //     await agoraEngine.unpublish(channelParameters.localVideoTrack);
+    //     channelParameters.localVideoTrack.close();
+    //   }
 
-      if (channelParameters.localAudioTrack) return;
-      channelParameters.localAudioTrack =
-        await AgoraRTC.createMicrophoneAudioTrack();
-      await agoraEngineVoice.publish(channelParameters.localAudioTrack);
-    }
+    //   if (channelParameters.localAudioTrack) return;
+    //   channelParameters.localAudioTrack =
+    //     await AgoraRTC.createMicrophoneAudioTrack();
+    //   await agoraEngineVoice.publish(channelParameters.localAudioTrack);
+    // }
 
     // Student's logic, Markup and event listeners
-    if (e.target.closest(".student-btn")) {
-      containerEl.innerHTML = `<button type="button" id="join">Join Stream</button>
-        <button type="button" id="leave">Leave</button>`;
-    }
-    if (e.target.closest("#join")) {
-      e.target.disabled = true;
-      options.role = "audience";
-      const clientRoleOptions = { level: 1 }; // Use Low latency mode
-      await agoraEngine.setClientRole(options.role, clientRoleOptions);
-      channelParameters.remoteAudioTrack.play();
-      document
-        .querySelector(".row")
-        .insertAdjacentHTML("beforeend", `<h3>Student Id: ${options.uid}</h3>`);
+    // if (e.target.closest(".student-btn")) {
+    //   containerEl.innerHTML = `<button type="button" id="join">Join Stream</button>
+    //     <button type="button" id="leave">Leave</button>`;
+    // }
+    // if (e.target.closest("#join")) {
+    //   e.target.disabled = true;
+    //   options.role = "audience";
+    //   const clientRoleOptions = { level: 1 }; // Use Low latency mode
+    //   await agoraEngine.setClientRole(options.role, clientRoleOptions);
+    //   channelParameters.remoteAudioTrack.play();
+    //   document
+    //     .querySelector(".row")
+    //     .insertAdjacentHTML("beforeend", `<h3>Student Id: ${options.uid}</h3>`);
 
-      if (
-        channelParameters.remoteAudioTrack &&
-        channelParameters.remoteVideoTrack
-      ) {
-        document.body.append(remotePlayerContainer);
-        channelParameters.remoteVideoTrack.play(remotePlayerContainer);
-      }
-    }
+    //   if (
+    //     channelParameters.remoteAudioTrack &&
+    //     channelParameters.remoteVideoTrack
+    //   ) {
+    //     document.body.append(remotePlayerContainer);
+    //     channelParameters.remoteVideoTrack.play(remotePlayerContainer);
+    //   }
+    // }
     if (e.target.closest("#leave")) {
       remotePlayerContainer.remove();
       localPlayerContainer.remove();
