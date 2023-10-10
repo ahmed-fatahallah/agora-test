@@ -6,7 +6,7 @@ let options = {
   channel: "test",
 
   token:
-    "007eJxTYDgXf/XVqkm7zs/Jn/k7WPpsVvv8zsvHJj7VefAv5dU3/m8GCgwWKWampsmGpilmSWkmRsYmlsmpqYaGKUkmFsmGyaZJRmIbpVIbAhkZ3r6fyMzIAIEgPgtDSWpxCQMDANTMJIc=",
+    "007eJxTYBCb8bD23abAs9efPTVdVtG4parsl/29DfPnTm1atCHtxjdGBQaLFDNT02RD0xSzpDQTI2MTy+TUVEPDlCQTi2TDZNMkI79XKqkNgYwMQbxfGRihEMRnYShJLS5hYAAAjckjNQ==",
 
   uid: Math.floor(Math.random() * 10000),
 
@@ -28,6 +28,10 @@ let channelParameters = {
 async function startBasicCall() {
   const containerEl = document.querySelector(".container");
   const agoraEngine = AgoraRTC.createClient({
+    mode: "live",
+    codec: "h264",
+  });
+  const agoraEngineVoice = AgoraRTC.createClient({
     mode: "live",
     codec: "h264",
   });
@@ -77,8 +81,26 @@ async function startBasicCall() {
         remotePlayerContainer.querySelector("div").remove();
     });
   });
+  agoraEngineVoice.on("user-published", async (user, mediaType) => {
+    await agoraEngine.subscribe(user, mediaType);
+
+    channelParameters.remoteAudioTrack = user.audioTrack;
+
+    if (mediaType == "audio") {
+      if (options.role === "audience") {
+        channelParameters.remoteAudioTrack.play();
+      }
+    }
+
+    agoraEngine.on("user-unpublished", () => {});
+  });
 
   await agoraEngine.join(options.appId, options.channel, options.token);
+  await agoraEngineVoice.join(
+    "8d655c15d6bf42349cee11db48c1c5b2",
+    "494164583032",
+    "00631ad69a8d07a48dd9c5363d0010a2feaIADmjc9cGbOPseriZvAR4+urHYdYNuozVxXyOU0zfQvJAtNwrkcAAAAACgC2b/RTnEsmZQAA}"
+  );
 
   containerEl.addEventListener("click", async (e) => {
     // Teacher's logic, Markup and event listeners
@@ -90,6 +112,7 @@ async function startBasicCall() {
 
       options.role = "host";
       await agoraEngine.setClientRole(options.role);
+      await agoraEngineVoice.setClientRole(options.role);
     }
 
     if (e.target.closest("#video")) {
@@ -111,7 +134,7 @@ async function startBasicCall() {
       if (!channelParameters.localAudioTrack) {
         channelParameters.localAudioTrack =
           await AgoraRTC.createMicrophoneAudioTrack({ AGC: false });
-        await agoraEngine.publish(channelParameters.localAudioTrack);
+        await agoraEngineVoice.publish(channelParameters.localAudioTrack);
       }
 
       channelParameters.localVideoTrack =
@@ -143,7 +166,7 @@ async function startBasicCall() {
       if (channelParameters.localAudioTrack) return;
       channelParameters.localAudioTrack =
         await AgoraRTC.createMicrophoneAudioTrack();
-      await agoraEngine.publish(channelParameters.localAudioTrack);
+      await agoraEngineVoice.publish(channelParameters.localAudioTrack);
     }
 
     // Student's logic, Markup and event listeners
@@ -174,6 +197,7 @@ async function startBasicCall() {
       localPlayerContainer.remove();
 
       await agoraEngine.leave();
+      await agoraEngineVoice.leave();
 
       window.location.reload();
     }
