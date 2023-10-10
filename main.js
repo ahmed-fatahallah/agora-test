@@ -14,11 +14,11 @@ let options = {
 };
 
 let channelParameters = {
-  localAudioTrack: null,
+  // localAudioTrack: null,
 
   localVideoTrack: null,
 
-  remoteAudioTrack: null,
+  // remoteAudioTrack: null,
 
   remoteVideoTrack: null,
 
@@ -31,10 +31,10 @@ async function startBasicCall() {
     mode: "live",
     codec: "h264",
   });
-  const agoraEngineVoice = AgoraRTC.createClient({
-    mode: "live",
-    codec: "h264",
-  });
+  // const agoraEngineVoice = AgoraRTC.createClient({
+  //   mode: "live",
+  //   codec: "h264",
+  // });
 
   const remotePlayerContainer = document.createElement("div");
 
@@ -81,20 +81,20 @@ async function startBasicCall() {
   //       remotePlayerContainer.querySelector("div").remove();
   //   });
   // });
-  agoraEngineVoice.on("user-published", async (user, mediaType) => {
-    await agoraEngineVoice.subscribe(user, mediaType);
+  // agoraEngineVoice.on("user-published", async (user, mediaType) => {
+  //   await agoraEngineVoice.subscribe(user, mediaType);
 
-    channelParameters.remoteAudioTrack = user.audioTrack;
+  //   channelParameters.remoteAudioTrack = user.audioTrack;
 
-    if (mediaType == "audio") {
-      channelParameters.remoteAudioTrack.play();
-      // if (options.role === "audience") {
-      //   channelParameters.remoteAudioTrack.play();
-      // }
-    }
+  //   if (mediaType == "audio") {
+  //     channelParameters.remoteAudioTrack.play();
+  //     // if (options.role === "audience") {
+  //     //   channelParameters.remoteAudioTrack.play();
+  //     // }
+  //   }
 
-    agoraEngineVoice.on("user-unpublished", () => {});
-  });
+  //   agoraEngineVoice.on("user-unpublished", () => {});
+  // });
 
   containerEl.addEventListener("click", async (e) => {
     // Teacher's logic, Markup and event listeners
@@ -104,7 +104,7 @@ async function startBasicCall() {
       //                           <button type="button" id="video">Stream Video</button>
       //                           <button type="button" id="leave">Leave</button>`;
       containerEl.innerHTML = `
-                                <button type="button" id="video">Stream Video</button>
+                                <button type="button" id="video">Stream Video only</button>
                                 <button type="button" id="leave">Leave</button>`;
 
       options.role = "host";
@@ -126,21 +126,21 @@ async function startBasicCall() {
       }
 
       await agoraEngine.join(options.appId, options.channel, options.token);
-      await agoraEngineVoice.join(
-        "8d655c15d6bf42349cee11db48c1c5b2",
-        "494164583032",
-        "00631ad69a8d07a48dd9c5363d0010a2feaIADmjc9cGbOPseriZvAR4+urHYdYNuozVxXyOU0zfQvJAtNwrkcAAAAACgC2b/RTnEsmZQAA}"
-      );
+      // await agoraEngineVoice.join(
+      //   "8d655c15d6bf42349cee11db48c1c5b2",
+      //   "494164583032",
+      //   "00631ad69a8d07a48dd9c5363d0010a2feaIADmjc9cGbOPseriZvAR4+urHYdYNuozVxXyOU0zfQvJAtNwrkcAAAAACgC2b/RTnEsmZQAA}"
+      // );
 
       if (channelParameters.remoteVideoTrack) {
         channelParameters.remoteVideoTrack.stop();
       }
 
-      if (!channelParameters.localAudioTrack) {
-        channelParameters.localAudioTrack =
-          await AgoraRTC.createMicrophoneAudioTrack({ AGC: false });
-        await agoraEngineVoice.publish(channelParameters.localAudioTrack);
-      }
+      // if (!channelParameters.localAudioTrack) {
+      //   channelParameters.localAudioTrack =
+      //     await AgoraRTC.createMicrophoneAudioTrack({ AGC: false });
+      //   await agoraEngineVoice.publish(channelParameters.localAudioTrack);
+      // }
 
       channelParameters.localVideoTrack =
         await AgoraRTC.createCameraVideoTrack();
@@ -202,7 +202,7 @@ async function startBasicCall() {
       localPlayerContainer.remove();
 
       await agoraEngine.leave();
-      await agoraEngineVoice.leave();
+      // await agoraEngineVoice.leave();
 
       window.location.reload();
     }
